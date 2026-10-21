@@ -1,0 +1,82 @@
+{
+ "activePlayer": {
+  "championStats": {
+   "abilityHaste": 8.0,
+   "abilityPower": 0.0,
+   "armor": 29.0,
+   "armorPenetrationFlat": 0.0,
+   "armorPenetrationPercent": 1.0,
+   "attackDamage": 67.4000015258789,
+   "attackRange": 550.0,
+   "attackSpeed": 0.6790000200271606,
+   "bonusArmorPenetrationPercent": 1.0,
+   "bonusMagicPenetrationPercent": 1.0,
+   "critChance": 0.0,
+   "critDamage": 175.0,
+   "currentHealth": 675.0,
+   "healShieldPower": 0.0,
+   "healthRegenRate": 0.75,
+   "lifeSteal": 0.0,
+   "magicLethality": 0.0,
+   "magicPenetrationFlat": 0.0,
+   "magicPenetrationPercent": 1.0,
+   "magicResist": 38.0,
+   "maxHealth": 675.0,
+   "moveSpeed": 335.0,
+   "omnivamp": 0.0,
+   "physicalLethality": 0.0,
+   "physicalVamp": 0.0,
+   "resourceMax": 360.55999755859375,
+   "resourceRegenRate": 1.6080000400543213,
+   "resourceType": "MANA",
+   "resourceValue": 360.55999755859375,
+   "spellVamp": 0.0,
+   "tenacity": 0.0
+  },
+  "currentGold": 690.7432861328125,
+  "level": 1,
+  "summonerName": "Player#EUW",
+  "riotId": "Player#EUW"
+ },
+ "allPlayers": [
+  {
+   "championName": "Draven",
+   "isBot": false,
+   "isDead": false,
+   "level": 1,
+   "team": "ORDER",
+   "summonerName": "Player#EUW",
+   "riotId": "Player#EUW"
+  },
+  {
+   "championName": "Trundle",
+   "isBot": true,
+   "isDead": false,
+   "level": 3,
+   "team": "CHAOS",
+   "summonerName": "Trundle Bot",
+   "riotId": ""
+  }
+ ],
+ "events": {
+  "Events": [
+   {
+    "EventID": 0,
+    "EventName": "GameStart",
+    "EventTime": 0.025289900600910187
+   },
+   {
+    "EventID": 1,
+    "EventName": "MinionsSpawning",
+    "EventTime": 65.0448989868164
+   }
+  ]
+ },
+ "gameData": {
+  "gameMode": "CLASSIC",
+  "gameTime": 203.55294799804688,
+  "mapName": "Map11",
+  "mapNumber": 11,
+  "mapTerrain": "Default"
+ }
+}

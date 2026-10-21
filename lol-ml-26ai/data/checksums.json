@@ -1,0 +1,14 @@
+{
+  "performance": {
+    "source_sha256": "04b1cbc2138e147f99c6ea648b7976fd8e4e28bb6503d54dd948a6e699c0fd3b",
+    "source_bytes": 1105668735,
+    "rows": 226910,
+    "columns": 98
+  },
+  "by_minute": {
+    "source_sha256": "a036228a2266156b98eaab1dfaa72674356ab8945f750c11b10a4b387a06e4db",
+    "source_bytes": 91183868,
+    "rows": 1000000,
+    "columns": 26
+  }
+}

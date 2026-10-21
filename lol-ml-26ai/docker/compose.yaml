@@ -1,0 +1,30 @@
+# Oracle AI Database 26ai Free in a container, for running the workshop's database part on your own machine.
+#
+#   export ORACLE_PASSWORD='<pick a password for SYS/SYSTEM>'
+#   docker compose -f docker/compose.yaml up -d
+#   docker compose -f docker/compose.yaml logs -f        # wait for "DATABASE IS READY TO USE!"
+#
+# Connect with LOLML_DB_DSN=localhost:${LOLML_DB_PORT:-1521}/FREEPDB1. No password is stored in this file.
+# Remove everything again:  docker compose -f docker/compose.yaml down -v
+services:
+  oracle-free:
+    image: ${ORACLE_FREE_IMAGE:-gvenzl/oracle-free:latest-faststart}
+    container_name: lolml-oracle-free
+    ports:
+      - "${LOLML_DB_PORT:-1521}:1521"
+    environment:
+      ORACLE_PASSWORD: ${ORACLE_PASSWORD:?export ORACLE_PASSWORD first (password for SYS and SYSTEM)}
+    volumes:
+      - lolml_oracle_free_data:/opt/oracle/oradata
+      # Runs after every start: gives the database vector memory so HNSW vector indexes work (restarts it once).
+      - ./startdb:/container-entrypoint-startdb.d:ro
+    healthcheck:
+      test: ["CMD", "healthcheck.sh"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+    shm_size: 1g
+
+volumes:
+  lolml_oracle_free_data:
