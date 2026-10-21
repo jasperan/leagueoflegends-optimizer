@@ -1,3 +1,4 @@
+# Legacy 2023 script, kept for reference. The maintained path is lol-ml-26ai/ (README there).
 # Copyright (c) 2022 Oracle and/or its affiliates.
 
 '''
@@ -27,16 +28,16 @@ riot_api_key = os.getenv("RIOT_API_KEY")
 
 
 def db_connectivity():
-    connection = oracledb.connect(
-        user=oracledb_user, password=oracledb_password, dsn=oracledb_connection_string)
-    cursor = connection.cursor()
     sql = """select sysdate from dual"""
 
     try:
+        connection = oracledb.connect(
+            user=oracledb_user, password=oracledb_password, dsn=oracledb_connection_string)
+        cursor = connection.cursor()
         cursor.execute(sql)
         print(f'{ok_string}DB Connectivity')
     except Exception as e:
-        print(f'{fail_string}DB Connectivity: {e.args.message}')
+        print(f'{fail_string}DB Connectivity: {e}')
 
 
 def riot_api_connectivity():
@@ -58,7 +59,7 @@ def riot_api_connectivity():
             print(
                 f'{fail_string}Riot API: HTTP {response.status_code} {response_message}')
     except Exception as e:
-        print(f'{fail_string}Riot API: {e.args.message}')
+        print(f'{fail_string}Riot API: {e}')
 
 
 def main():

@@ -1,3 +1,4 @@
+# Legacy 2023 script, kept for reference. The maintained path is lol-ml-26ai/ (README there).
 # Copyright (c) 2022 Oracle and/or its affiliates.
 
 '''
@@ -6,6 +7,7 @@ This file uses web sockets to communicate Live Client API data from one endpoint
 wherever you want, and let it process the incoming data from the producer.
 ''' 
 
+import time
 from pathlib import Path
 import requests
 import pandas as pd
@@ -18,26 +20,38 @@ from rich import print
 
 
 cli_parser = argparse.ArgumentParser()
-cli_parser.add_argument('-i', '--ip', type=str, help='IP address to make requests to', required=True)
+cli_parser.add_argument('-i', '--ip', type=str, help='address to listen on (default 127.0.0.1, loopback only)',
+                        default='127.0.0.1')
 args = cli_parser.parse_args()
 
+MIN_INTERVAL = 1.0  # seconds: never ask the local game API more often than this, serve the cached answer instead
+_last_fetch = 0.0
+_last_content = {}
+
 def build_object(content):
+    global _last_fetch, _last_content
     try:
         assert type(content) == type(str())
     except AssertionError:
-        return '{}'
+        return {}
+    if time.monotonic() - _last_fetch < MIN_INTERVAL:
+        return _last_content
+    _last_fetch = time.monotonic()
     try:
-        response = requests.get('https://127.0.0.1:2999/liveclientdata/allgamedata', verify=False)
-    except requests.exceptions.ConnectionError:
+        response = requests.get('https://127.0.0.1:2999/liveclientdata/allgamedata', verify=False, timeout=5)
+    except requests.exceptions.RequestException:
         print('{} | Currently not in game'.format(datetime.datetime.now()))
-        return '{}'
+        _last_content = {}
+        return _last_content
+    if response.status_code != 200:
+        _last_content = {}
+        return _last_content
     # We convert to JSON format
     content = response.json()
-    print('{} {}'.format('x'*5, content))
     for x in content['allPlayers']:
-        del x['items'] # delete items to avoid quotation marks
+        x.pop('items', None) # delete items to avoid quotation marks
 
-    print('Content: {}'.format(content))
+    _last_content = content
     return content
 
 
@@ -45,7 +59,7 @@ def build_object(content):
 async def handler(websocket):
     while True:
         message = await websocket.recv()
-        print(message)
+        print('{} | request: {}'.format(datetime.datetime.now(), message))  # logged once per request
 
         if message == 'get_liveclient_data':
             result = build_object(message)
@@ -58,7 +72,8 @@ async def handler(websocket):
 
 
 async def main():
-    async with websockets.serve(handler, "", 8001):
+    # bind to loopback by default: the Live Client data should not be exposed to the whole network
+    async with websockets.serve(handler, args.ip, 8001):
         await asyncio.Future()  # run forever
 
 

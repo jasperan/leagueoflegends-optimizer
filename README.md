@@ -1,6 +1,12 @@
 # League of Legends Optimizer
 
-Try these Hands-On Labs yourself! Choose the topic you like the most.
+## New: Can AI Win League of Legends? Machine Learning with OCI and Oracle AI Database 26ai
+
+One revamped workshop replaces the three labs below: Python 3.12 with pinned dependencies, no Riot API key required, the leakage lesson, serving, and Autonomous AI Database 26ai. Code and notebooks are in [`lol-ml-26ai/`](./lol-ml-26ai/README.md).
+
+## Earlier Hands-On Labs (legacy)
+
+Choose the topic you like the most. These guides and the 2023 scripts are kept for reference.
 
 - [Data Extraction](https://oracle-devrel.github.io/leagueoflegends-optimizer/hols/workshops/dataextraction/index.html) - About Data Extraction & Engineering!
 - [Model Building with scikit-learn and AutoGluon](https://oracle-devrel.github.io/leagueoflegends-optimizer/hols/workshops/mlwithoci/index.html) - Illustrates the whole AI process once we have data available

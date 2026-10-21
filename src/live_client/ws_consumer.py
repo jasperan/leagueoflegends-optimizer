@@ -1,3 +1,4 @@
+# Legacy 2023 script, kept for reference. The maintained path is lol-ml-26ai/ (README there).
 # Copyright (c) 2022 Oracle and/or its affiliates.
 
 '''
@@ -38,6 +39,7 @@ async def get_info(uri):
             #print(message)
             _CURRENT_DATA = message
             process_and_predict(_CURRENT_DATA)
+            await asyncio.sleep(1.0)  # throttle: one request per second to the producer / local game API
 
 
 
@@ -50,17 +52,18 @@ def main():
 def process_and_predict(input):
 
     json_obj = json.loads(input)
-    team_color = str()
+    team_color = 'white'  # fallback if the local player cannot be found
     try:
         json_obj['allPlayers']
     except (KeyError, TypeError):
         return
+    # Team colour comes from the ACTIVE player (the one whose stats are fed to the model), matched by riotId or
+    # the legacy summonerName. The first non-bot player in allPlayers is usually somebody else.
+    active = json_obj.get('activePlayer', {})
+    me = active.get('riotId') or active.get('summonerName')
     for x in json_obj['allPlayers']:
-        if x['team'] == 'ORDER' and x['isBot'] == False:
-            team_color = 'blue'
-            break
-        elif x['team'] == 'CHAOS' and x['isBot'] == False:
-            team_color = 'red'
+        if me and me in (x.get('riotId'), x.get('summonerName')):
+            team_color = {'ORDER': 'blue', 'CHAOS': 'red'}.get(x.get('team'), 'white')
             break
         
     # Timestamp given by the Live Client API is in thousands of a second from the starting point.

@@ -1,3 +1,4 @@
+# Legacy 2023 script, kept for reference. The maintained path is lol-ml-26ai/ (README there).
 # Copyright (c) 2021 Oracle and/or its affiliates.
 
 import os
@@ -51,8 +52,7 @@ headers = {
     "X-Riot-Token": riot_api_key
 }
 
-# 1000 requests per minute using development key
-# AK89OMWJzaal2SSLDtQszoKUZ220Akz0JppfTK6pF97VYve_KQEHcA9RdEx88ghXl_SbW6Nfpj2xyg
+# development keys allow 20 requests/second and 100 requests/2 minutes
 
 
 def get_puuid_by_summoner_id(summoner_id, request_region, db=None):

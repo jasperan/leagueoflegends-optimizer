@@ -1,3 +1,4 @@
+# Legacy 2023 script, kept for reference. The maintained path is lol-ml-26ai/ (README there).
 # Copyright (c) 2021 Oracle and/or its affiliates.
 
 import requests
@@ -8,21 +9,18 @@ import urllib3
 from autogluon.tabular import TabularDataset, TabularPredictor
 import pandas as pd
 from rich import print
-# https://stackoverflow.com/questions/57286486/i-cant-load-my-model-because-i-cant-put-a-posixpath
-import pathlib
-temp = pathlib.PosixPath
-pathlib.PosixPath = pathlib.WindowsPath
 urllib3.disable_warnings()
 
  
 import argparse
 
-# you can specify your model path here, 
-parser = argparse.ArgumentParser(description='Process some integers.')
+# the model path is required: pass the folder of your trained AutoGluon predictor
+parser = argparse.ArgumentParser(description='Live win/performance hints from the local League client.')
 parser.add_argument('-m', '--model_path', type=str, help='path to the trained model',
-                    required=False,
-                    default="H:/Downloads/live1/",
+                    required=True,
                 )
+parser.add_argument('-i', '--interval', type=float, default=2.0,
+                    help='seconds to wait between requests to the local game API (default 2)')
 args = parser.parse_args()
 
 
@@ -30,9 +28,9 @@ args = parser.parse_args()
 
 def build_object(content):
     # We convert to JSON format
-    content = response.json()
+    content = json.loads(content)
     for x in content['allPlayers']:
-        del x['items'] # delete items to avoid quotation marks
+        x.pop('items', None) # delete items to avoid quotation marks
     built_obj = {
         'activePlayer': content['activePlayer'],
         'allPlayers': content['allPlayers'],
@@ -51,12 +49,23 @@ def build_object(content):
     'f4': total_damage_per_min,
     'f5': gold_per_min,
 '''
+def local_player(obj):
+    # The local player is activePlayer, NOT allPlayers[0]: match it by riotId (or the legacy summonerName).
+    active = obj['activePlayer']
+    me = active.get('riotId') or active.get('summonerName')
+    for p in obj['allPlayers']:
+        if me and me in (p.get('riotId'), p.get('summonerName')):
+            return p
+    raise LookupError('active player {!r} not found in allPlayers'.format(me))
+
+
 def parse_object(obj):
     #print(obj['gameData']['gameTime'])
     duration = obj['gameData']['gameTime'] / 60 # get duration in minutes
+    me = local_player(obj)
 
-    deaths_per_min = obj['allPlayers'][0]['scores']['deaths'] / duration
-    k_a_per_min = (obj['allPlayers'][0]['scores']['kills'] + obj['allPlayers'][0]['scores']['assists']) / duration
+    deaths_per_min = me['scores']['deaths'] / duration
+    k_a_per_min = (me['scores']['kills'] + me['scores']['assists']) / duration
     level_per_min = obj['activePlayer']['level'] / duration
 
     f1 = deaths_per_min
@@ -65,7 +74,7 @@ def parse_object(obj):
 
 
     relevant_data = {
-        'championName': obj['allPlayers'][0]['championName'],
+        'championName': me['championName'],
         'f1': f1,
         'f2': f2,
         'f3': f3,
@@ -192,16 +201,19 @@ predictor = TabularPredictor.load(args.model_path, require_py_version_match=Fals
 
 while True:
     try:
-        response = requests.get('https://127.0.0.1:2999/liveclientdata/allgamedata', verify=False)
-    except requests.exceptions.ConnectionError:
+        response = requests.get('https://127.0.0.1:2999/liveclientdata/allgamedata', verify=False, timeout=5)
+    except requests.exceptions.RequestException:
         # Try again every 5 seconds
         print('{} | Currently not in game'.format(datetime.datetime.now()))
         time.sleep(5)
         continue
 
     # Display result
-    if response.status_code != 404:
-        result = build_object(response.content)
-        result = parse_object(result)
-        predict(result, predictor)
-    time.sleep(2) # wait 10 seconds before making another request
+    if response.status_code == 200:
+        try:
+            result = build_object(response.content)
+            result = parse_object(result)
+            predict(result, predictor)
+        except (KeyError, LookupError) as e:
+            print('{} | Game state not readable yet: {!r}'.format(datetime.datetime.now(), e))
+    time.sleep(args.interval) # do not hammer the local game API
